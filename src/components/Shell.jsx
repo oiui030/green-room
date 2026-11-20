@@ -20,8 +20,8 @@ export function Nav() {
         <NavLink key={t.to} to={t.to} className={({ isActive }) => `nav-item${isActive ? ' on' : ''}`}>
           {({ isActive }) => (
             <>
-              <Icon name={t.icon} size={22} width={2.2} />
-              <span className={isActive ? '' : 'sr'}>{t.label}</span>
+              <span className="nav-ic"><Icon name={t.icon} size={22} width={2.2} /></span>
+              <span>{t.label}</span>
             </>
           )}
         </NavLink>
