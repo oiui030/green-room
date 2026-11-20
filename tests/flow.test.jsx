@@ -108,7 +108,11 @@ describe('frog helper', () => {
     renderApp('/log', state);
     await user.click(screen.getByRole('button', { name: '개구리에게 도움 요청' }));
     const sheet = screen.getByRole('dialog', { name: '개구리 도우미' });
+    await user.click(within(sheet).getByRole('button', { name: '식물이 이상해요' }));
+    expect(within(sheet).getByText('선인장, 어떤 모습이에요?')).toBeInTheDocument();
     await user.click(within(sheet).getByRole('button', { name: /밑동이 무르고/ }));
+    expect(within(sheet).getByText(/물배가 빵빵해요/)).toBeInTheDocument();
+    await user.click(within(sheet).getByRole('button', { name: '구조 작전 시작' }));
 
     expect(screen.getByRole('heading', { name: '물배가 빵빵해요' })).toBeInTheDocument();
     expect(screen.getByText('6개 중 0개')).toBeInTheDocument();
@@ -129,7 +133,8 @@ describe('frog helper', () => {
     const user = userEvent.setup();
     renderApp('/home', onboarded());
     await user.click(screen.getByRole('button', { name: '개구리에게 도움 요청' }));
-    expect(screen.getByRole('link', { name: '도감에서 등록하기' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: '식물이 이상해요' }));
+    expect(screen.getByRole('button', { name: '도감에서 등록하기' })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: '닫기' }));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
@@ -144,5 +149,83 @@ describe('frog helper', () => {
     await user.click(screen.getByRole('button', { name: /이 식물과 헤어지기/ }));
     await user.click(screen.getByRole('button', { name: '헤어질게요' }));
     expect(screen.getByText('아직 식구가 없어요')).toBeInTheDocument();
+  });
+});
+
+describe('improvements from the walkthrough', () => {
+  it('lets a mistaken tap on the done button be undone', async () => {
+    const user = userEvent.setup();
+    renderApp('/home', onboarded((s) => reducer(s, { type: 'addPlant', species: 'pothos', daysAgo: 7 })));
+    await user.click(screen.getByRole('button', { name: '줬어요' }));
+    expect(screen.getByText('오늘 할 일 없음')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('스킨답서스 물 줬어요');
+    await user.click(screen.getByRole('button', { name: '되돌리기' }));
+    expect(screen.getByText('스킨답서스 물 주기')).toBeInTheDocument();
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
+
+  it('shows an unfinished rescue plan on the home screen instead of a rest day', async () => {
+    const user = userEvent.setup();
+    const state = onboarded((s) => reducer(reducer(s, { type: 'addPlant', species: 'ivy', daysAgo: 0 }), { type: 'startRescue', id: 'p1', symptom: 'yellow' }));
+    renderApp('/home', state);
+    expect(screen.getByText('구조 작전 중')).toBeInTheDocument();
+    expect(screen.queryByText('오늘은 쉬는 날')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('link', { name: '이어가기' }));
+    expect(screen.getByRole('heading', { name: '뿌리가 답답해요' })).toBeInTheDocument();
+  });
+
+  it('suggests plants for the room on an empty home and lets the room be changed from the catalog', async () => {
+    const user = userEvent.setup();
+    renderApp('/home', reducer(initialState, { type: 'onboard', profile: { light: 'low', style: 'oops' } }));
+    expect(screen.getByText('내 방에 맞는 친구')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /스투키.*찰떡궁합/ })).toBeInTheDocument();
+    await user.click(screen.getByRole('link', { name: '전부 보기' }));
+    expect(screen.getByText('햇빛 적은 방, 자주 잊는 집사 기준이에요')).toBeInTheDocument();
+    await user.click(screen.getByRole('link', { name: '바꾸기' }));
+    expect(screen.getByRole('button', { name: /거의 안 들어요/ })).toHaveAttribute('aria-pressed', 'true');
+    await user.click(screen.getByRole('button', { name: /햇빛 맛집이에요/ }));
+    await user.click(screen.getByRole('button', { name: '다음' }));
+    await user.click(screen.getByRole('button', { name: '이 기준으로 다시 고르기' }));
+    expect(screen.getByText('햇빛 잘 드는 방, 자주 잊는 집사 기준이에요')).toBeInTheDocument();
+  });
+});
+
+describe('frog chat', () => {
+  const two = () => onboarded((s) => reducer(reducer(s, { type: 'addPlant', species: 'stuki', daysAgo: 0 }), { type: 'addPlant', species: 'pothos', daysAgo: 7 }));
+
+  it('asks which plant when there are several, then offers a rescue plan to confirm', async () => {
+    const user = userEvent.setup();
+    renderApp('/home', two());
+    await user.click(screen.getByRole('button', { name: /어딘가 이상해요/ }));
+    const sheet = screen.getByRole('dialog', { name: '개구리 도우미' });
+    expect(within(sheet).getByText('어느 식물이에요?')).toBeInTheDocument();
+    await user.click(within(sheet).getByRole('button', { name: '스투키' }));
+    await user.click(within(sheet).getByRole('button', { name: /잎이 노랗게/ }));
+    await user.click(within(sheet).getByRole('button', { name: '다른 증상이에요' }));
+    await user.click(within(sheet).getByRole('button', { name: /키만 삐죽/ }));
+    await user.click(within(sheet).getByRole('button', { name: '구조 작전 시작' }));
+    expect(screen.getByRole('heading', { name: '햇빛이 고파요' })).toBeInTheDocument();
+  });
+
+  it('reads a typed symptom and plant name, and says so when it cannot read a message', async () => {
+    const user = userEvent.setup();
+    renderApp('/log', two());
+    await user.click(screen.getByRole('button', { name: '개구리에게 도움 요청' }));
+    const sheet = screen.getByRole('dialog', { name: '개구리 도우미' });
+    await user.type(within(sheet).getByRole('textbox', { name: '직접 적기' }), '오늘 날씨 좋네{Enter}');
+    expect(within(sheet).getByText(/아직 글을 읽고 답하진 못해요/)).toBeInTheDocument();
+    await user.type(within(sheet).getByRole('textbox', { name: '직접 적기' }), '스킨답서스 잎이 노랗게 됐어{Enter}');
+    expect(within(sheet).getByText(/뿌리가 답답해요/)).toBeInTheDocument();
+    expect(within(sheet).getByRole('button', { name: '구조 작전 시작' })).toBeInTheDocument();
+  });
+
+  it('answers when to water from the schedule', async () => {
+    const user = userEvent.setup();
+    renderApp('/log', two());
+    await user.click(screen.getByRole('button', { name: '개구리에게 도움 요청' }));
+    await user.click(screen.getByRole('button', { name: '물 언제 줘요?' }));
+    expect(screen.getByText(/스킨답서스: 오늘이에요/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: '돌봄 달력 보기' }));
+    expect(screen.getByRole('heading', { name: '돌봄 달력' })).toBeInTheDocument();
   });
 });

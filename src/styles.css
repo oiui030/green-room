@@ -39,8 +39,8 @@ a { color: inherit; }
 
 /* frame */
 .page { position: relative; max-width: 480px; min-height: 100dvh; margin: 0 auto; background: var(--surf); display: flex; flex-direction: column; overflow-x: hidden; }
-.page-body { position: relative; flex: 1; display: flex; flex-direction: column; gap: 14px; padding: 12px 20px 24px; }
-.page-body.pad { padding-top: 8px; }
+.page-body { position: relative; flex: 1; display: flex; flex-direction: column; gap: 14px; padding: calc(12px + env(safe-area-inset-top)) 20px 24px; }
+.page-body.pad { padding-top: calc(8px + env(safe-area-inset-top)); }
 .with-tabs .page-body { padding-bottom: calc(var(--tabs) + 104px + env(safe-area-inset-bottom)); }
 .page:not(.with-tabs) .page-body { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
 .bottom { margin-top: auto; padding-top: 8px; }
@@ -80,8 +80,8 @@ a { color: inherit; }
 .label.soft { font-size: 13px; font-weight: 700; color: var(--gray); }
 .note { font-size: 13px; color: var(--gray); }
 .note-l { font-size: 15px; color: var(--gray); }
-.meta { display: flex; flex-wrap: wrap; white-space: nowrap; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; color: var(--gray); }
-.meta svg:nth-of-type(2) { margin-left: 6px; }
+.meta { display: flex; flex-wrap: wrap; white-space: nowrap; align-items: center; gap: 2px 8px; font-size: 12px; font-weight: 700; color: var(--gray); }
+.meta-item { display: inline-flex; align-items: center; gap: 2px; }
 /* the tilted highlighter label: at most one per screen */
 .tag { align-self: flex-start; display: inline-block; padding: 3px 10px 2px; border-radius: 4px 9px 5px 8px; background: var(--lime); color: var(--ink); font-size: 14px; font-weight: 800; transform: rotate(-2deg); }
 .tag.dark { background: var(--ink); color: var(--lime); }
@@ -96,7 +96,7 @@ a { color: inherit; }
 .btn.lime { background: var(--lime); color: var(--ink); }
 .icon-btn { width: 48px; height: 48px; border: none; border-radius: var(--b2); background: var(--sage); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .back { align-self: flex-start; display: flex; align-items: center; gap: 4px; min-height: 48px; padding: 0 12px 0 0; border: none; background: none; font-size: 15px; font-weight: 700; text-decoration: none; }
-.textlink { align-self: flex-start; display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 0; border: none; background: none; font-size: 14px; font-weight: 700; color: var(--gray); text-decoration: underline; text-underline-offset: 4px; }
+.textlink { align-self: flex-start; display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 44px; min-height: 44px; padding: 0; border: none; background: none; font-size: 14px; font-weight: 700; color: var(--gray); text-decoration: underline; text-underline-offset: 4px; }
 .textlink.center { align-self: center; }
 .textlink.ink { color: inherit; }
 
@@ -146,7 +146,7 @@ a { color: inherit; }
 .sticker { display: inline-flex; border-radius: var(--b3); background: var(--pale); flex-shrink: 0; }
 .sticker.lime { background: var(--lime); }
 .sticker.b1, .sticker.b1 .frog { border-radius: var(--b1); }
-.bubble { padding: 12px 16px; background: var(--white); border-radius: 4px 20px 20px 20px; font-size: 14px; }
+.bubble { word-break: keep-all; padding: 12px 16px; background: var(--white); border-radius: 4px 20px 20px 20px; font-size: 14px; }
 .fab-wrap { position: fixed; right: max(16px, calc(50vw - 224px)); bottom: calc(24px + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 10px; z-index: 20; pointer-events: none; }
 .fab-wrap.above-tabs { bottom: calc(var(--tabs) + 16px + env(safe-area-inset-bottom)); }
 .fab { pointer-events: auto; padding: 0; border: none; background: none; display: flex; filter: drop-shadow(0 6px 10px rgba(31, 61, 43, 0.28)); }
@@ -249,3 +249,46 @@ a { color: inherit; }
 
 /* a ground-coloured halo keeps the floating frog apart from the blobs that scroll under it */
 .fab .sticker { box-shadow: 0 0 0 4px var(--surf); }
+
+/* a short confirmation with a way back, for taps that are easy to make by accident */
+.toast { position: fixed; left: max(16px, calc(50vw - 224px)); right: max(104px, calc(50vw - 136px)); bottom: calc(28px + env(safe-area-inset-bottom)); min-height: 52px; padding: 4px 6px 4px 16px; display: flex; align-items: center; gap: 8px; border-radius: 999px; background: var(--ink); color: var(--surf); font-size: 14px; font-weight: 700; z-index: 25; box-shadow: 0 6px 14px rgba(31, 61, 43, 0.28); }
+.toast.above-tabs { bottom: calc(var(--tabs) + 28px + env(safe-area-inset-bottom)); }
+.toast-undo { min-width: 72px; min-height: 44px; padding: 0 12px; border: none; border-radius: 999px; background: none; color: var(--lime); font-size: 14px; font-weight: 800; flex-shrink: 0; }
+.chips.scroll { flex-wrap: nowrap; overflow-x: auto; margin: 0 -20px; padding: 0 20px; scrollbar-width: none; }
+.chips.scroll::-webkit-scrollbar { display: none; }
+.chips.scroll .chip { flex-shrink: 0; }
+.profile-row { min-height: 44px; margin-top: -8px; }
+.intro-frog { align-self: center; }
+
+/* the frog helper as a chat: its lines on the left, yours on the right, suggested answers under the last line */
+.sheet.chat { height: 82dvh; max-height: 82dvh; overflow: hidden; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+.chat-log { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 4px 0 8px; }
+.msg { max-width: 84%; padding: 10px 14px; font-size: 15px; line-height: 1.5; white-space: pre-line; word-break: keep-all; }
+.msg.frog { align-self: flex-start; background: var(--surf); border-radius: 4px 18px 18px 18px; }
+.msg.me { align-self: flex-end; background: var(--ink); color: var(--surf); border-radius: 18px 4px 18px 18px; }
+.replies { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.reply { min-height: 44px; padding: 8px 16px; border: 1.5px solid var(--ink); border-radius: 999px; background: var(--white); font-size: 14px; font-weight: 800; text-align: left; }
+.chat-input { display: flex; align-items: center; gap: 8px; padding: 4px 4px 4px 16px; border-radius: 999px; background: var(--surf); }
+.chat-input input { flex: 1; min-width: 0; min-height: 44px; border: none; background: none; font: inherit; font-size: 16px; color: var(--ink); outline: none; }
+.chat-input input::placeholder { color: var(--gray); }
+.chat-input:focus-within { box-shadow: 0 0 0 2px var(--ink); }
+.chat-send { width: 44px; height: 44px; border: none; border-radius: 999px; background: var(--ink); color: var(--lime); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.chat-send:disabled { background: var(--line); color: var(--gray); }
+
+/* the talk has a rhythm: three dots while the frog writes, then the line rises in and the answers follow */
+.msg { animation: msg-in 0.22s ease-out both; }
+.msg.typing { display: flex; align-items: center; gap: 5px; min-height: 42px; padding: 0 16px; }
+.msg.typing span { width: 7px; height: 7px; border-radius: 999px; background: var(--gray); animation: dot 1s ease-in-out infinite; }
+.msg.typing span:nth-child(2) { animation-delay: 0.15s; }
+.msg.typing span:nth-child(3) { animation-delay: 0.3s; }
+.replies { animation: msg-in 0.22s ease-out 0.18s both; }
+@keyframes msg-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes dot { 0%, 60%, 100% { transform: translateY(0); opacity: 0.45; } 30% { transform: translateY(-4px); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .msg, .replies { animation: none; }
+  .msg.typing span { animation: none; opacity: 0.7; }
+}
+
+/* a photo sent to the frog */
+.msg.photo { padding: 4px; }
+.msg-photo { display: block; width: 180px; max-width: 100%; border-radius: 14px 2px 14px 14px; }

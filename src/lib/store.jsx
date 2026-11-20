@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useReducer } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useState } from 'react';
 import { SPECIES } from './catalog.js';
 import { SYMPTOMS } from './rescue.js';
 import { addDays, todayStr } from './dates.js';
@@ -100,6 +100,9 @@ export function reducer(state, action) {
       };
     }
 
+    case 'restore':
+      return action.state;
+
     case 'reset':
       return initialState;
 
@@ -130,7 +133,23 @@ export function StoreProvider({ children, initial }) {
       // Storage can be unavailable (private mode, quota). The app still works for this visit.
     }
   }, [state]);
-  const value = useMemo(() => ({ state, dispatch }), [state]);
+  // `act` is dispatch for things a thumb can do by accident: it remembers the state
+  // from just before, and shows a short message with a way back.
+  const [toast, setToast] = useState(null);
+  const act = useCallback((action, message) => {
+    setToast({ message, prev: state, at: Date.now() });
+    dispatch(action);
+  }, [state]);
+  const undo = useCallback(() => {
+    if (toast) dispatch({ type: 'restore', state: toast.prev });
+    setToast(null);
+  }, [toast]);
+  useEffect(() => {
+    if (!toast) return undefined;
+    const timer = setTimeout(() => setToast(null), 6000);
+    return () => clearTimeout(timer);
+  }, [toast]);
+  const value = useMemo(() => ({ state, dispatch, act, undo, toast }), [state, act, undo, toast]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 

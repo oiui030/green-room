@@ -140,3 +140,68 @@ describe('store', () => {
     expect(new Set(s.logs.map((l) => l.id)).size).toBe(s.logs.length);
   });
 });
+
+describe('frog talk', () => {
+  it('reads symptoms and intents from plain words, symptoms first', async () => {
+    const { matchText } = await import('../src/lib/frogtalk.js');
+    expect(matchText('잎이 노랗고 이상해요')).toEqual({ symptom: 'yellow' });
+    expect(matchText('요즘 시들시들해')).toEqual({ symptom: 'droopy' });
+    expect(matchText('물 언제 줘야 해')).toEqual({ intent: 'water' });
+    expect(matchText('초보한테 추천해줘')).toEqual({ intent: 'recommend' });
+    expect(matchText('오늘 날씨 좋네')).toBeNull();
+    expect(matchText('   ')).toBeNull();
+  });
+
+  it('types for a short, bounded time that grows with the reply', async () => {
+    const { typingDelay } = await import('../src/lib/frogtalk.js');
+    expect(typingDelay('네')).toBeGreaterThanOrEqual(500);
+    expect(typingDelay('가'.repeat(20))).toBeGreaterThan(typingDelay('가'));
+    expect(typingDelay('가'.repeat(500))).toBe(1200);
+    expect(typingDelay('가'.repeat(500), true)).toBe(250);
+  });
+});
+
+describe('photo diagnosis answers', () => {
+  const load = () => import('../src/lib/diagnose.js');
+  const stuki = { found: true, score: 0.82, scientific: 'Dracaena angolensis', genus: 'Dracaena', family: 'Asparagaceae', common: '' };
+
+  it('names a catalog plant and maps a watering problem to its rescue plan', async () => {
+    const { interpret } = await load();
+    const seen = interpret({
+      species: stuki,
+      health: { isPlant: true, healthy: false, healthyProbability: 0.2, issues: [{ name: 'water excess or uneven watering', localName: '과습', probability: 0.64 }] },
+      failed: { species: false, health: false },
+    });
+    expect(seen.kind).toBe('issue');
+    expect(seen.species).toBe('stuki');
+    expect(seen.symptom).toBe('mushy');
+    expect(seen.lines[0]).toBe('제 눈엔 스투키 같아요 (82%).');
+    expect(seen.lines).toContain('의심되는 문제: 과습 (64%)');
+    expect(seen.lines[seen.lines.length - 1]).toBe('사진 한 장으로 본 추정이에요.');
+  });
+
+  it('says healthy without inventing a problem, and sends unknown problems to a person', async () => {
+    const { interpret } = await load();
+    const healthy = interpret({ species: stuki, health: { isPlant: true, healthy: true, healthyProbability: 0.9, issues: [] }, failed: {} });
+    expect(healthy.kind).toBe('healthy');
+    expect(healthy.symptom).toBeNull();
+    const fungus = interpret({ species: stuki, health: { isPlant: true, healthy: false, healthyProbability: 0.1, issues: [{ name: 'Fungi', localName: '곰팡이병', probability: 0.7 }] }, failed: {} });
+    expect(fungus.kind).toBe('issue');
+    expect(fungus.symptom).toBeNull();
+    expect(fungus.lines.join(' ')).toContain('사람 눈이 필요해요');
+  });
+
+  it('does not guess when the photo is unclear, a plant is unknown, or the service is not ready', async () => {
+    const { interpret } = await load();
+    expect(interpret({ species: { found: false }, health: { isPlant: false, healthy: null, issues: [] }, failed: {} }).kind).toBe('unclear');
+    const unknown = interpret({ species: { found: true, score: 0.6, scientific: 'Rosa canina', genus: 'Rosa', family: 'Rosaceae', common: '찔레' }, health: null, failed: {} });
+    expect(unknown.species).toBeNull();
+    expect(unknown.lines[0]).toBe('제 눈엔 찔레 같아요 (60%).');
+    expect(unknown.lines.join(' ')).toContain('건강 진단은 아직 준비 중');
+    expect(interpret({ error: 'not_configured' }).lines[0]).toBe('사진 진단은 아직 준비 중이에요.');
+    expect(interpret({ error: 'network' }).kind).toBe('error');
+    const weak = interpret({ species: { ...stuki, score: 0.05 }, health: { isPlant: true, healthy: true, issues: [] }, failed: {} });
+    expect(weak.species).toBeNull();
+    expect(weak.lines[0]).toBe('어떤 식물인지는 잘 모르겠어요.');
+  });
+});

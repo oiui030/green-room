@@ -12,6 +12,9 @@ const FILTERS = [
   ['shade', '그늘도 좋아', (s) => s.light.includes('low')],
 ];
 
+const LIGHT_LABEL = { high: '햇빛 잘 드는 방', mid: '반나절 햇빛 드는 방', low: '햇빛 적은 방' };
+const STYLE_LABEL = { day: '꼬박꼬박 챙기는 집사', week: '가끔 깜빡하는 집사', oops: '자주 잊는 집사' };
+
 export default function Discover() {
   const { state } = useStore();
   const [params] = useSearchParams();
@@ -27,7 +30,13 @@ export default function Discover() {
     <Page tabs>
       <h1 className="h1 sm">{mine ? '어떤 식물인가요?' : '식물 도감'}</h1>
       {mine && <span className="note">키우는 식물을 고르면 돌봄 일정이 만들어져요.</span>}
-      <div className="chips" role="group" aria-label="필터">
+      {!mine && (
+        <div className="row between gap-8 profile-row">
+          <span className="note">{LIGHT_LABEL[state.profile.light]}, {STYLE_LABEL[state.profile.style]} 기준이에요</span>
+          <Link className="textlink ink" to="/onboard">바꾸기</Link>
+        </div>
+      )}
+      <div className="chips scroll" role="group" aria-label="필터">
         {FILTERS.map(([key, label]) => (
           <button key={key} type="button" className={`chip${filter === key ? ' on' : ''}`} aria-pressed={filter === key} onClick={() => setFilter(key)}>
             {label}
@@ -41,8 +50,8 @@ export default function Discover() {
             <span className="pblob"><PlantIcon kind={s.icon} size={60} label="" /></span>
             <span className="title-s">{s.name}</span>
             <span className="meta">
-              <Icon name="drop" size={16} color="var(--gray)" />{s.water}
-              <Icon name="sun" size={16} color="var(--gray)" />{s.sun}
+              <span className="meta-item"><Icon name="drop" size={14} width={2} color="var(--gray)" />{s.water}</span>
+              <span className="meta-item"><Icon name="sun" size={14} width={2} color="var(--gray)" />{s.sun}</span>
             </span>
           </Link>
         ))}

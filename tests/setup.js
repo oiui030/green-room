@@ -6,3 +6,6 @@ afterEach(() => {
   cleanup();
   localStorage.clear();
 });
+
+// jsdom has no layout, so scrolling is a no-op here.
+window.scrollTo = () => {};
