@@ -8,6 +8,7 @@ import { SYMPTOMS, SYMPTOM_KEYS } from '../lib/rescue.js';
 import { dueTasks, nextWater, plantName, taskTitle, wateringPaused } from '../lib/schedule.js';
 import { relativeLabel, todayStr } from '../lib/dates.js';
 import { matchText, typingDelay } from '../lib/frogtalk.js';
+import { interpret, photoEnabled, preparePhoto, sendPhoto } from '../lib/diagnose.js';
 
 // Tests run the talk without the typing pause.
 const INSTANT = import.meta.env.MODE === 'test';
@@ -20,6 +21,10 @@ export default function FrogSheet({ plantId = null, intent = null, onClose }) {
   const navigate = useNavigate();
   const [text, setText] = useState('');
   const endRef = useRef(null);
+  const fileRef = useRef(null);
+  // The plant the talk is about when a photo is sent, so the answer can attach to it.
+  const aboutRef = useRef(null);
+  const canPhoto = photoEnabled();
   const byId = (id) => state.plants.find((p) => p.id === id);
   const only = () => byId(plantId) || (state.plants.length === 1 ? state.plants[0] : undefined);
 
@@ -29,6 +34,7 @@ export default function FrogSheet({ plantId = null, intent = null, onClose }) {
     return {
       text: line,
       options: [
+        ...(canPhoto ? [{ label: '사진 찍어 물어보기', next: () => askPhoto(only()) }] : []),
         { label: '식물이 이상해요', next: () => sick(only()) },
         { label: '물 언제 줘요?', next: water },
         { label: '어떤 식물이 좋을까요?', next: recommend },
@@ -60,6 +66,7 @@ export default function FrogSheet({ plantId = null, intent = null, onClose }) {
     return {
       text: `${plantName(plant)}, 어떤 모습이에요?`,
       options: [
+        ...(canPhoto ? [{ label: '사진으로 보여줄게요', next: () => askPhoto(plant) }] : []),
         ...SYMPTOM_KEYS.map((key) => ({ label: SYMPTOMS[key].label, next: () => diagnose(plant, key) })),
         { label: '잘 모르겠어요', next: unsure },
       ],
@@ -77,6 +84,39 @@ export default function FrogSheet({ plantId = null, intent = null, onClose }) {
         { label: '다른 증상이에요', next: () => sick(plant) },
       ],
     };
+  }
+
+  // Says where the photo goes before the picker opens. `pickPhoto` must run inside the tap.
+  function askPhoto(plant) {
+    aboutRef.current = plant ? plant.id : null;
+    return {
+      text: '잎이 크게 나오게 찍어주세요.\n초록방은 사진을 저장하지 않아요. 진단을 위해 외부 식물 인식 서비스(Pl@ntNet, Kindwise)로 보내요.',
+      options: [{ label: '사진 고르기', pickPhoto: true }, other()],
+    };
+  }
+
+  // What the frog says once the photo has been read.
+  function photoReply(result) {
+    const seen = interpret(result);
+    const text = seen.lines.join('\n');
+    const retry = { label: '다시 찍기', pickPhoto: true };
+    const about = byId(aboutRef.current);
+    const mine = about || (seen.species ? state.plants.find((p) => p.species === seen.species && !p.rescue) : undefined) || only();
+    if (seen.kind === 'error') return { text, options: [retry, { label: '증상 고르기', next: () => sick(only()) }, other()] };
+    if (seen.kind === 'unclear') return { text, options: [retry, { label: '증상 고르기', next: () => sick(only()) }] };
+    const options = [];
+    if (seen.symptom && mine && !mine.rescue) {
+      options.push({ label: '구조 작전 시작', run: () => dispatch({ type: 'startRescue', id: mine.id, symptom: seen.symptom }), go: `/plan/${mine.id}` });
+    } else if (seen.symptom && state.plants.length > 1) {
+      options.push({ label: '어느 식물인지 고르기', next: () => sick(undefined, seen.symptom) });
+    }
+    if (seen.species && !state.plants.some((p) => p.species === seen.species)) {
+      options.push({ label: `${SPECIES[seen.species].name} 식구로 등록`, go: `/species/${seen.species}?mode=mine` });
+    }
+    if (seen.kind === 'issue' && !seen.symptom) options.push({ label: '사람 도움 받기', go: '/help' });
+    if (seen.kind !== 'healthy') options.push({ label: '증상 직접 고르기', next: () => sick(mine) });
+    options.push(retry, other());
+    return { text, options };
   }
 
   function unsure() {
@@ -143,7 +183,28 @@ export default function FrogSheet({ plantId = null, intent = null, onClose }) {
     if (endRef.current && endRef.current.scrollIntoView) endRef.current.scrollIntoView({ block: 'end' });
   }, [msgs, typing]);
 
+  const onPhoto = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    setTyping(true);
+    let reply;
+    try {
+      const photo = await preparePhoto(file);
+      setMsgs((m) => [...m, { from: 'me', image: photo.preview, text: '사진을 보냈어요' }]);
+      reply = photoReply(await sendPhoto(photo.base64));
+    } catch {
+      reply = photoReply({ error: 'failed' });
+    }
+    setTyping(false);
+    setMsgs((m) => [...m, { from: 'frog', ...reply }]);
+  };
+
   const pick = (option) => {
+    if (option.pickPhoto) {
+      if (fileRef.current) fileRef.current.click();
+      return;
+    }
     if (option.run) option.run();
     if (option.go) {
       onClose();
@@ -190,10 +251,10 @@ export default function FrogSheet({ plantId = null, intent = null, onClose }) {
 
         <div className="chat-log" role="log" aria-live="polite" aria-label="대화">
           {msgs.map((m, i) => (
-            <div key={i} className={`msg ${m.from}`}>
+            <div key={i} className={`msg ${m.from}${m.image ? ' photo' : ''}`}>
               {m.from === 'frog' && <span className="sr">개구리: </span>}
               {m.from === 'me' && <span className="sr">나: </span>}
-              {m.text}
+              {m.image ? <img className="msg-photo" src={m.image} alt={m.text} /> : m.text}
             </div>
           ))}
           {typing && (
@@ -211,6 +272,7 @@ export default function FrogSheet({ plantId = null, intent = null, onClose }) {
           <span ref={endRef} />
         </div>
 
+        {canPhoto && <input ref={fileRef} type="file" accept="image/*" hidden aria-hidden="true" tabIndex={-1} onChange={onPhoto} />}
         <form className="chat-input" onSubmit={send}>
           <input type="text" value={text} onChange={(e) => setText(e.target.value)} aria-label="직접 적기" placeholder="직접 적어도 돼요" enterKeyHint="send" autoComplete="off" />
           <button type="submit" className="chat-send" aria-label="보내기" disabled={!text.trim() || typing}>

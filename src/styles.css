@@ -288,3 +288,7 @@ a { color: inherit; }
   .msg, .replies { animation: none; }
   .msg.typing span { animation: none; opacity: 0.7; }
 }
+
+/* a photo sent to the frog */
+.msg.photo { padding: 4px; }
+.msg-photo { display: block; width: 180px; max-width: 100%; border-radius: 14px 2px 14px 14px; }

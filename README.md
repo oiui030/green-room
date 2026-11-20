@@ -19,7 +19,11 @@ npm run build    # 배포용 빌드 (dist/)
 - `develop`: 모든 작업이 먼저 들어오는 곳. 여기서 `npm test`와 `npm run build`를 통과시킨다.
 - `main`: develop에서 테스트를 통과하고 기능이 완결된 것만 병합한다. 반쯤 된 기능은 develop에 남긴다.
 - main에 직접 커밋하지 않는다. develop에서 main으로 풀 리퀘스트를 열고, 저장소 주인이 확인한 뒤 병합한다.
-- main에 병합되면 GitHub Actions가 테스트와 빌드를 돌린 뒤 GitHub Pages로 배포한다 (`.github/workflows/deploy.yml`). 저장소 Settings의 Pages에서 Source를 GitHub Actions로 한 번 골라 두어야 한다.
+- GitHub Pages에는 두 빌드가 올라간다. main은 `https://oiui030.github.io/green-room/`, develop은 `https://oiui030.github.io/green-room/dev/` (`.github/workflows/deploy.yml`). 저장소 Settings의 Pages에서 Source를 GitHub Actions로 한 번 골라 두어야 한다.
+
+## 사진 진단
+
+개구리 대화에서 사진으로 종과 건강 상태를 본다. 서버는 Supabase 함수이고, 켜는 방법은 `docs/PHOTO_DIAGNOSIS.md`에 있다.
 
 ## 아이폰 앱
 
