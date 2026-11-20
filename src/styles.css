@@ -151,11 +151,13 @@ a { color: inherit; }
 .fab-wrap.above-tabs { bottom: calc(var(--tabs) + 16px + env(safe-area-inset-bottom)); }
 .fab { pointer-events: auto; padding: 0; border: none; background: none; display: flex; filter: drop-shadow(0 6px 10px rgba(31, 61, 43, 0.28)); }
 
-/* bottom tabs: dark bar, the current tab is a lime pill with its name */
-.nav { position: fixed; left: 50%; bottom: 0; transform: translateX(-50%); width: 100%; max-width: 480px; height: calc(var(--tabs) + env(safe-area-inset-bottom)); padding: 0 16px calc(14px + env(safe-area-inset-bottom)); display: flex; justify-content: space-between; align-items: center; background: var(--ink); z-index: 10; }
-.nav-item { min-width: 64px; min-height: 48px; padding: 0 14px; display: flex; align-items: center; justify-content: center; gap: 6px; border-radius: 999px; font-size: 13px; font-weight: 800; color: var(--surf); text-decoration: none; }
-.nav-item.on { background: var(--lime); color: var(--ink); border-radius: var(--b2); }
-.nav-item:focus-visible { outline-color: var(--lime); }
+/* bottom tabs: a white bar on the gray ground. Every tab keeps its name;
+   the current one gets the same dark pill with lime content that marks any selection */
+.nav { position: fixed; left: 50%; bottom: 0; transform: translateX(-50%); width: 100%; max-width: 480px; height: calc(var(--tabs) + env(safe-area-inset-bottom)); padding: 0 12px calc(10px + env(safe-area-inset-bottom)); display: flex; justify-content: space-around; align-items: center; background: var(--white); border-top: 1px solid var(--line); border-radius: 24px 24px 0 0; z-index: 10; }
+.nav-item { min-width: 64px; min-height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 12px; font-weight: 700; color: var(--gray); text-decoration: none; }
+.nav-ic { width: 56px; height: 32px; border-radius: 999px; display: flex; align-items: center; justify-content: center; }
+.nav-item.on { color: var(--ink); font-weight: 800; }
+.nav-item.on .nav-ic { background: var(--ink); color: var(--lime); }
 
 /* home */
 .hero { position: relative; min-height: 280px; padding: 20px; border-radius: 32px; background: var(--lime); overflow: hidden; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
@@ -244,3 +246,6 @@ a { color: inherit; }
   .intro-frog { transform: scale(0.85) rotate(-4deg); margin-top: 0; }
 }
 .bottom > .btn, .bottom > .card { width: 100%; }
+
+/* a ground-coloured halo keeps the floating frog apart from the blobs that scroll under it */
+.fab .sticker { box-shadow: 0 0 0 4px var(--surf); }
