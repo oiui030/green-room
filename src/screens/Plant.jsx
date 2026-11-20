@@ -31,42 +31,42 @@ export default function Plant() {
   return (
     <Page frog={false}>
       <BackLink to="/home" label="내 방" />
-      <div className="plant-hero"><PlantIcon kind={s.icon} size={104} label={s.name} /></div>
-      <div className="row between baseline">
-        <h1 className="h1">{plantName(plant)}</h1>
-        <span className="note">함께한 지 {days + 1}일</span>
+      <div className="plant-hero">
+        <div className="col gap-4">
+          <span className="hero-note">함께한 지 {days + 1}일</span>
+          <h1 className="h1">{plantName(plant)}</h1>
+        </div>
+        <span className="pblob"><PlantIcon kind={s.icon} size={72} label={s.name} /></span>
       </div>
 
       <div className="grid-3">
-        <div className="card ctile"><Icon name="drop" size={26} width={2} color="var(--green)" />{s.water}</div>
-        <div className="card ctile"><Icon name="sun" size={26} width={2} color="var(--green)" />{s.sun}</div>
-        <div className="card ctile"><Icon name="sprout" size={26} width={2} color="var(--green)" />{s.level}</div>
+        <div className="card ctile"><Icon name="drop" size={26} width={2} />{s.water}</div>
+        <div className="card ctile"><Icon name="sun" size={26} width={2} />{s.sun}</div>
+        <div className="card ctile"><Icon name="sprout" size={26} width={2} />{s.level}</div>
       </div>
 
       {plant.rescue ? (
         <Link className="rowcard" to={`/plan/${plant.id}`}>
-          <Icon name="sos" size={24} color="var(--green)" />
+          <Icon name="sos" size={24} />
           <span className="grow">구조 작전 진행 중</span>
           <span className="note">{relativeLabel(plant.rescue.startedAt, today)} 시작</span>
         </Link>
       ) : null}
       <div className="rowcard static">
-        <Icon name="drop" size={24} color="var(--green)" />
+        <Icon name="drop" size={24} />
         <span className="grow">다음 물</span>
         <span className="note">{wateringPaused(plant) ? '구조 중이라 쉬어요' : water <= today ? '오늘' : relativeLabel(water, today)}</span>
       </div>
       {wipe && (
         <div className="rowcard static">
-          <Icon name="leaf" size={24} color="var(--green)" />
+          <Icon name="leaf" size={24} />
           <span className="grow">다음 잎 닦기</span>
           <span className="note">{wipe <= today ? '오늘' : relativeLabel(wipe, today)}</span>
         </div>
       )}
 
-      <div className="card col gap-8">
-        <span className="title-s">이렇게 키워요</span>
-        <ul className="tips">{s.tips.map((t) => <li key={t}>{t}</li>)}</ul>
-      </div>
+      <span className="label">이것만 기억해요</span>
+      <ul className="tips">{s.tips.map((t) => <li key={t}>{t}</li>)}</ul>
 
       {confirm ? (
         <div className="card col gap-8">
@@ -91,7 +91,7 @@ export default function Plant() {
           <Link className="btn primary grow" to={`/plan/${plant.id}`}>구조 작전 이어가기</Link>
         ) : (
           <button type="button" className="btn primary grow" onClick={() => setSheet(true)}>
-            <Icon name="sos" size={20} width={2} />어딘가 이상해요
+어딘가 이상해요
           </button>
         )}
       </div>
