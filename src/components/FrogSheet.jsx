@@ -26,7 +26,7 @@ export default function FrogSheet({ plantId, onClose }) {
       <div className="sheet" role="dialog" aria-modal="true" aria-label="개구리 도우미" onClick={(e) => e.stopPropagation()}>
         <span className="grabber" aria-hidden="true" />
         <div className="row gap-12">
-          <Frog size={52} />
+          <Frog size={64} ring={5} tone="lime" />
           <div className="grow col gap-2">
             <span className="hand sheet-title">어디가 이상해요?</span>
             <span className="note">어느 화면에서든 불러요</span>
@@ -46,7 +46,7 @@ export default function FrogSheet({ plantId, onClose }) {
 
         {state.plants.length > 1 && (
           <div className="col gap-8">
-            <span className="label">어느 식물인가요?</span>
+            <span className="label soft">어느 식물인가요?</span>
             <div className="chips">
               {state.plants.map((p) => (
                 <button key={p.id} type="button" className={`chip${picked === p.id ? ' on' : ''}`} aria-pressed={picked === p.id} onClick={() => setPicked(p.id)}>
@@ -59,7 +59,7 @@ export default function FrogSheet({ plantId, onClose }) {
 
         {plant && !plant.rescue && (
           <div className="col gap-8">
-            <span className="label">{plantName(plant)}, 어떤 모습이에요?</span>
+            <span className="label soft">{plantName(plant)}, 어떤 모습이에요?</span>
             {SYMPTOM_KEYS.map((key) => (
               <button key={key} type="button" className="rowcard" onClick={() => start(key)}>
                 <span className="grow">{SYMPTOMS[key].label}</span>
@@ -83,10 +83,7 @@ export default function FrogSheet({ plantId, onClose }) {
           </Link>
         ))}
 
-        <Link className="btn secondary" to="/help" onClick={onClose}>
-          <Icon name="sos" size={22} width={2} />
-          사람 도움 받기
-        </Link>
+        <Link className="textlink center ink" to="/help" onClick={onClose}>사람 도움 받기</Link>
       </div>
     </div>
   );

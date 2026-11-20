@@ -9,11 +9,11 @@ export default function Help() {
         <h1 className="h1">혼자 하긴 무섭죠</h1>
         <span className="note">그럴 땐 불러요. 식물도 병원에 가요.</span>
       </div>
-      <div className="card col gap-8">
+      <div className="clinic col gap-8">
         <span className="note">공공 서비스로 운영하는 식물 병원</span>
         <span className="title-m">서울시 반려식물 클리닉</span>
         <span className="note">전문가가 진단하고 분갈이와 약제 처방을 도와줘요. 서울시 공공서비스예약에서 신청해요.</span>
-        <a className="btn primary" href="https://yeyak.seoul.go.kr/" target="_blank" rel="noreferrer">예약하러 가기</a>
+        <a className="btn lime" href="https://yeyak.seoul.go.kr/" target="_blank" rel="noreferrer">예약하러 가기</a>
       </div>
       <div className="card col gap-8">
         <span className="title-s">가기 전에 챙겨요</span>

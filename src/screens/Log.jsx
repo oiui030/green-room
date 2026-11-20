@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Icon, { PlantIcon } from '../components/Icon.jsx';
+import Icon from '../components/Icon.jsx';
 import { Page } from '../components/Shell.jsx';
 import { useStore } from '../lib/store.jsx';
-import { SPECIES } from '../lib/catalog.js';
 import { todayStr, relativeLabel } from '../lib/dates.js';
 import { plantName } from '../lib/schedule.js';
 
@@ -18,7 +17,7 @@ export default function Log() {
 
   return (
     <Page tabs>
-      <h1 className="h1 sm">기록</h1>
+      <h1 className="h1 sm">돌봄 기록</h1>
       {state.plants.length === 0 ? (
         <div className="card col gap-8">
           <span className="title-s">아직 기록이 없어요</span>
@@ -27,15 +26,6 @@ export default function Log() {
         </div>
       ) : (
         <>
-          <div className="tiles three">
-            {state.plants.slice(0, 6).map((p) => (
-              <Link key={p.id} className="tile" to={`/plant/${p.id}`}>
-                <PlantIcon kind={SPECIES[p.species].icon} size={34} label="" />
-                <span className="tile-name">{plantName(p)}</span>
-                <span className="tile-state">{p.rescue ? '회복 중' : '잘 지내요'}</span>
-              </Link>
-            ))}
-          </div>
           <div className="chips" role="group" aria-label="식물 고르기">
             <button type="button" className={`chip${filter === 'all' ? ' on' : ''}`} aria-pressed={filter === 'all'} onClick={() => setFilter('all')}>전체</button>
             {state.plants.map((p) => (
@@ -46,10 +36,10 @@ export default function Log() {
           </div>
           {days.map((day) => (
             <div key={day} className="col gap-8">
-              <span className="label">{relativeLabel(day, today)}</span>
+              <span className="label soft">{relativeLabel(day, today)}</span>
               {logs.filter((l) => l.at === day).map((l) => (
                 <div key={l.id} className="rowcard static">
-                  <Icon name={ICON[l.type] || 'list'} size={24} />
+                  <span className={`disc sm${l.type === 'recover' ? ' lime' : ''}`}><Icon name={ICON[l.type] || 'list'} size={20} width={2.2} /></span>
                   <span className="grow">{l.text}</span>
                 </div>
               ))}

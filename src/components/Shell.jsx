@@ -20,8 +20,8 @@ export function Nav() {
         <NavLink key={t.to} to={t.to} className={({ isActive }) => `nav-item${isActive ? ' on' : ''}`}>
           {({ isActive }) => (
             <>
-              <Icon name={t.icon} size={26} width={isActive ? 2.2 : 1.8} />
-              {t.label}
+              <Icon name={t.icon} size={22} width={2.2} />
+              <span className={isActive ? '' : 'sr'}>{t.label}</span>
             </>
           )}
         </NavLink>
@@ -31,16 +31,16 @@ export function Nav() {
 }
 
 // Page frame. `tabs` shows the bottom menu, `frog` shows the floating helper.
-export function Page({ children, tabs = false, frog = true, plantId = null, hint = null, className = '' }) {
+export function Page({ children, tabs = false, frog = true, plantId = null, className = '', deco = null }) {
   const [open, setOpen] = useState(false);
   return (
     <div className={`page ${tabs ? 'with-tabs' : ''} ${className}`}>
+      {deco}
       <main className="page-body">{children}</main>
       {frog && (
         <div className={`fab-wrap ${tabs ? 'above-tabs' : ''}`}>
-          {hint && <span className="fab-hint hand">{hint}</span>}
           <button type="button" className="fab" aria-label="개구리에게 도움 요청" onClick={() => setOpen(true)}>
-            <Frog size={58} />
+            <Frog size={72} ring={6} tone="lime" />
           </button>
         </div>
       )}

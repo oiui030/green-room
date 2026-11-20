@@ -18,7 +18,8 @@ npm run build    # 배포용 빌드 (dist/)
 
 - `develop`: 모든 작업이 먼저 들어오는 곳. 여기서 `npm test`와 `npm run build`를 통과시킨다.
 - `main`: develop에서 테스트를 통과하고 기능이 완결된 것만 병합한다. 반쯤 된 기능은 develop에 남긴다.
-- main에 직접 커밋하지 않는다. 병합은 `git merge --no-ff develop`로 해서 어떤 묶음이 올라갔는지 남긴다.
+- main에 직접 커밋하지 않는다. develop에서 main으로 풀 리퀘스트를 열고, 저장소 주인이 확인한 뒤 병합한다.
+- main에 병합되면 GitHub Actions가 테스트와 빌드를 돌린 뒤 GitHub Pages로 배포한다 (`.github/workflows/deploy.yml`). 저장소 Settings의 Pages에서 Source를 GitHub Actions로 한 번 골라 두어야 한다.
 
 ## 들어 있는 기능 (v0.1.0)
 

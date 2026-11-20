@@ -7,21 +7,26 @@ import { useStore } from '../lib/store.jsx';
 function Dots({ at }) {
   return (
     <div className="dots" aria-hidden="true">
-      {[0, 1, 2].map((i) => <span key={i} className={i === at ? 'on' : ''} />)}
+      {[0, 1, 2].map((i) => <span key={i} className={i <= at ? 'on' : ''} />)}
     </div>
   );
 }
 
 export function Intro() {
   return (
-    <div className="page">
-      <main className="page-body pad center-col">
-        <div className="intro-head">
-          <span className="hand note-l">내 방에 초록 한 칸</span>
-          <h1 className="wordmark">초록방</h1>
+    <div className="page intro">
+      <main className="page-body pad">
+        <div className="intro-head"><h1 className="wordmark">초록방</h1></div>
+        <span className="intro-frog"><Frog size={240} ring={11} shape="b1" /></span>
+        <div className="intro-copy">
+          <span className="tag dark">혼자 사는 집사님께</span>
+          <span className="h1">자취방에도<br />초록 한 칸</span>
+          <p>물 줄 날은 제가 기억할게요.<br />집사님은 예뻐만 해주세요.</p>
         </div>
-        <img className="intro-art" src="./img/frog.webp" alt="비 오는 풀숲 사이로 고개를 내민 개구리" />
-        <div className="bottom">
+        <div className="bottom col">
+          <svg className="intro-arrow" aria-hidden="true" width="52" height="52" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10 8 C4 34 22 54 50 44 M38 34 L51 44 L40 55" />
+          </svg>
           <Link className="btn primary" to="/about">시작하기</Link>
         </div>
       </main>
@@ -30,29 +35,31 @@ export function Intro() {
 }
 
 const ABOUT = [
-  ['book', '찾기', '내 방에 맞는 식물을 골라줘요'],
-  ['calendar', '돌보기', '물 줄 날을 챙겨줘요'],
-  ['sos', '살리기', '이상하면 응급처치를 알려줘요'],
-  ['list', '기록하기', '돌본 날이 차곡차곡 쌓여요'],
+  ['book', '내 방에 맞는 식물을 골라줘요', '햇빛과 돌봄 습관만 알려주세요'],
+  ['drop', '물 줄 날은 제가 기억해요', '식물마다 주기가 달라도 걱정 없어요'],
+  ['sos', '이상하면 응급처치를 알려줘요', '어느 화면에서든 개구리를 불러요'],
+  ['list', '돌본 날이 차곡차곡 쌓여요', '기록이 쌓일수록 관리가 쉬워져요'],
 ];
 
 export function About() {
   return (
     <div className="page">
       <main className="page-body pad">
-        <div className="row between topbar"><Dots at={0} /></div>
+        <div className="row topbar"><Dots at={0} /></div>
         <h1 className="h1">초록방이<br />해주는 일</h1>
-        <div className="grid-2">
+        <div className="col gap-16">
           {ABOUT.map(([icon, title, line]) => (
-            <div key={title} className="card about-card">
-              <span className="disc"><Icon name={icon} size={28} width={2} color="var(--green)" /></span>
-              <span className="title-s">{title}</span>
-              <span className="note">{line}</span>
+            <div key={title} className="about-row">
+              <span className="about-blob"><Icon name={icon} size={32} width={2.2} /></span>
+              <div className="col gap-2">
+                <span className="title-m">{title}</span>
+                <span className="note">{line}</span>
+              </div>
             </div>
           ))}
         </div>
         <div className="row gap-12">
-          <Frog size={56} />
+          <Frog size={64} ring={5} />
           <div className="bubble hand grow">초보여도 괜찮아요. 저도 처음엔 올챙이였어요.</div>
         </div>
         <div className="bottom">
@@ -82,10 +89,10 @@ export function Onboard() {
     return (
       <div className="page">
         <main className="page-body pad">
-          <div className="row between topbar"><Dots at={1} /></div>
+          <div className="row topbar"><Dots at={1} /></div>
           <h1 className="h1">내 방은<br />어떤 곳인가요?</h1>
           <div className="col gap-8">
-            <span className="label">햇빛</span>
+            <span className="label soft">햇빛</span>
             <div className="grid-3" role="group" aria-label="햇빛">
               {LIGHTS.map(([key, label]) => (
                 <button key={key} type="button" className={`option${light === key ? ' on' : ''}`} aria-pressed={light === key} onClick={() => setLight(key)}>
@@ -97,7 +104,7 @@ export function Onboard() {
             <span className="note">{LIGHTS.find((l) => l[0] === light)[2]}</span>
           </div>
           <div className="col gap-8">
-            <span className="label">나는 어떤 집사</span>
+            <span className="label soft">나는 어떤 집사</span>
             <div className="grid-3" role="group" aria-label="나는 어떤 집사">
               {STYLES.map(([key, label, icon]) => (
                 <button key={key} type="button" className={`option${style === key ? ' on' : ''}`} aria-pressed={style === key} onClick={() => setStyle(key)}>
@@ -118,10 +125,10 @@ export function Onboard() {
   return (
     <div className="page">
       <main className="page-body pad">
-        <div className="row between topbar"><Dots at={2} /></div>
+        <div className="row topbar"><Dots at={2} /></div>
         <h1 className="h1">같이 사는<br />식물이 있나요?</h1>
         <button type="button" className="choice" onClick={() => finish('/discover?mode=mine')}>
-          <span className="disc lg"><Icon name="sprout" size={32} width={2} color="var(--green)" /></span>
+          <span className="disc lg"><Icon name="sprout" size={32} width={2} /></span>
           <span className="grow col gap-4">
             <span className="title-m">있어요</span>
             <span className="note">도감에서 골라 등록해요</span>
@@ -129,7 +136,7 @@ export function Onboard() {
           <Icon name="chev" size={22} width={2} color="var(--gray)" />
         </button>
         <button type="button" className="choice" onClick={() => finish('/discover')}>
-          <span className="disc lg"><Icon name="book" size={32} width={2} color="var(--green)" /></span>
+          <span className="disc lg"><Icon name="book" size={32} width={2} /></span>
           <span className="grow col gap-4">
             <span className="title-m">아직 없어요</span>
             <span className="note">어울리는 친구를 찾아줘요</span>

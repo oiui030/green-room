@@ -1,5 +1,6 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import Icon from '../components/Icon.jsx';
+import Frog from '../components/Frog.jsx';
 import { Page, BackLink } from '../components/Shell.jsx';
 import { Missing } from './Discover.jsx';
 import { useStore } from '../lib/store.jsx';
@@ -33,12 +34,15 @@ export default function Plan() {
   };
 
   return (
-    <Page frog={false}>
+    <Page frog={false} className="dark" deco={<span className="blob-deco" aria-hidden="true" />}>
       <BackLink to={`/plant/${plant.id}`} label={plantName(plant)} />
-      <div className="col gap-4">
-        <span className="note">{plantName(plant)} 구조 작전</span>
-        <h1 className="h1">{symptom.verdict}</h1>
-        <span className="badge dark">{symptom.cause}</span>
+      <div className="row between gap-12">
+        <div className="col gap-8 start">
+          <span className="tag">{plantName(plant)} 구조 작전</span>
+          <h1 className="h1">{symptom.verdict}</h1>
+          <span className="note">{symptom.cause}</span>
+        </div>
+        <Frog size={104} ring={7} tone="lime" />
       </div>
       <div className="row gap-12">
         <div className="bar grow" role="progressbar" aria-valuemin={0} aria-valuemax={symptom.steps.length} aria-valuenow={done.length}>
