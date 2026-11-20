@@ -50,8 +50,8 @@ export default function Discover() {
             <span className="pblob"><PlantIcon kind={s.icon} size={60} label="" /></span>
             <span className="title-s">{s.name}</span>
             <span className="meta">
-              <Icon name="drop" size={16} color="var(--gray)" />{s.water}
-              <Icon name="sun" size={16} color="var(--gray)" />{s.sun}
+              <span className="meta-item"><Icon name="drop" size={14} width={2} color="var(--gray)" />{s.water}</span>
+              <span className="meta-item"><Icon name="sun" size={14} width={2} color="var(--gray)" />{s.sun}</span>
             </span>
           </Link>
         ))}
