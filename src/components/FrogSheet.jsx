@@ -77,7 +77,7 @@ export default function FrogSheet({ plantId, onClose }) {
 
         {!plant && ongoing.map((p) => (
           <Link key={p.id} className="rowcard" to={`/plan/${p.id}`} onClick={onClose}>
-            <PlantIcon kind={SPECIES[p.species].icon} size={26} label="" />
+            <span className="disc sm"><PlantIcon kind={SPECIES[p.species].icon} size={24} label="" /></span>
             <span className="grow">{plantName(p)} 구조 작전 이어가기</span>
             <Icon name="chev" size={20} width={2} color="var(--gray)" />
           </Link>

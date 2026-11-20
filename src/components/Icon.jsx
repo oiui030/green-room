@@ -29,75 +29,67 @@ export default function Icon({ name, size = 24, color = 'currentColor', width = 
   );
 }
 
-const POT = <path d="M17 52 h26 l-3 20 h-20z" />;
+// Filled plant silhouettes, one per species icon. Fine lines inside a shape are drawn in
+// `--cut`, which each blob sets to its own background colour so they read as gaps.
+const CUT = { fill: 'none', stroke: 'var(--cut, transparent)', strokeLinecap: 'round' };
+const FROND = 'M24 46 C21.5 34 22 20 24 6 C26 20 26.5 34 24 46z';
 const PLANTS = {
   stuki: (
-    <>
-      <path d="M30 52 C24 40 24 22 30 8 C36 22 36 40 30 52z" />
-      <path d="M30 52 C20 46 14 36 14 24 C22 26 28 36 30 52z" />
-      <path d="M30 52 C40 46 46 36 46 24 C38 26 32 36 30 52z" />
-    </>
+    <path d="M14 44 C10 30 12 14 16 6 C20 16 20 32 18 44z M24 44 C21 28 22 10 25 2 C29 12 29 30 27 44z M33 44 C31 32 32 18 35 10 C39 20 38 34 36 44z" />
   ),
   cactus: (
-    <>
-      <path d="M24 52 V18 a6 6 0 0 1 12 0 V52" />
-      <path d="M24 42 h-5 a5 5 0 0 1 -5 -5 v-6" />
-      <path d="M36 36 h5 a5 5 0 0 0 5 -5 v-5" />
-    </>
+    <path d="M19 44 V13 a5 5 0 0 1 10 0 V44z M8 22 a4 4 0 0 1 8 0 v5 h4 v7 h-6 a6 6 0 0 1 -6 -6z M40 18 a4 4 0 0 0 -8 0 v7 h-4 v7 h6 a6 6 0 0 0 6 -6z" />
   ),
   pothos: (
     <>
-      <path d="M30 52 V28" />
-      <path d="M30 52 C30 42 24 38 16 40" />
-      <path d="M30 52 C30 40 36 34 44 36" />
-      <ellipse cx="30" cy="22" rx="6" ry="7" />
-      <ellipse cx="12" cy="38" rx="6" ry="5" />
-      <ellipse cx="48" cy="34" rx="6" ry="5" />
+      <path d="M24 43 C8 33 6 18 14 12 C19 9 23 12 24 16 C25 12 29 9 34 12 C42 18 40 33 24 43z" />
+      <path d="M24 40 V20" strokeWidth="2.5" {...CUT} />
     </>
   ),
   monstera: (
     <>
-      <path d="M30 52 V34" />
-      <path d="M30 34 C16 34 10 22 15 10 C24 5 36 5 45 10 C50 22 44 34 30 34z" />
-      <path d="M30 34 V12 M30 26 L21 19 M30 26 L39 19" />
+      <path d="M24 4 C38 6 44 18 42 30 C40 40 30 44 24 44 C18 44 8 40 6 30 C4 18 10 6 24 4z" />
+      <path d="M24 44 V14 M6 28 h9 M42 28 h-9 M9 16 l8 5 M39 16 l-8 5" strokeWidth="3" {...CUT} />
     </>
   ),
   zz: (
     <>
-      <path d="M26 52 C24 38 20 24 16 12" />
-      <path d="M34 52 C36 38 40 24 44 12" />
-      <path d="M22 40 l-8 -2 M20 30 l-8 -2 M18 20 l-7 -2 M38 40 l8 -2 M40 30 l8 -2 M42 20 l7 -2" />
+      <path d="M23 46 h2 V8 h-2z" />
+      <ellipse cx="24" cy="6.5" rx="3.6" ry="5.5" />
+      {[13, 22, 31, 40].map((y) => (
+        <g key={y}>
+          <ellipse cx="15.5" cy={y} rx="7.5" ry="3.7" transform={`rotate(24 15.5 ${y})`} />
+          <ellipse cx="32.5" cy={y} rx="7.5" ry="3.7" transform={`rotate(-24 32.5 ${y})`} />
+        </g>
+      ))}
     </>
   ),
   palm: (
     <>
-      <path d="M30 52 V26" />
-      <path d="M30 26 C22 20 14 20 8 26 M30 26 C38 20 46 20 52 26 M30 26 C26 16 20 10 12 10 M30 26 C34 16 40 10 48 10 M30 26 V8" />
+      {[-62, -38, -14, 14, 38, 62].map((deg) => <path key={deg} d={FROND} transform={`rotate(${deg} 24 46)`} />)}
     </>
   ),
   rubber: (
     <>
-      <path d="M30 52 V14" />
-      <ellipse cx="20" cy="38" rx="9" ry="5" transform="rotate(-25 20 38)" />
-      <ellipse cx="40" cy="30" rx="9" ry="5" transform="rotate(25 40 30)" />
-      <ellipse cx="22" cy="20" rx="8" ry="5" transform="rotate(-25 22 20)" />
+      <path d="M23 46 h2 V30 h-2z" />
+      <ellipse cx="24" cy="18" rx="8.5" ry="15" />
+      <ellipse cx="12.5" cy="30" rx="6.5" ry="11.5" transform="rotate(-42 12.5 30)" />
+      <ellipse cx="35.5" cy="30" rx="6.5" ry="11.5" transform="rotate(42 35.5 30)" />
+      <path d="M24 31 V8" strokeWidth="2" {...CUT} />
     </>
   ),
   ivy: (
     <>
-      <path d="M30 52 C30 40 18 40 14 50 C12 58 12 64 14 70" />
-      <path d="M30 52 C30 38 44 38 46 48 C48 56 48 62 46 68" />
-      <path d="M30 52 V34" />
-      <path d="M30 34 l-5 -6 5 -8 5 8z M14 50 l-5 -3 1 -6 6 2z M46 48 l5 -3 -1 -6 -6 2z" />
+      <path d="M24 45 C22 39 14 41 5 35 C11 31 10 24 5 15 C14 18 19 15 24 3 C29 15 34 18 43 15 C38 24 37 31 43 35 C34 41 26 39 24 45z" />
+      <path d="M24 42 V14 M24 30 L12 22 M24 30 L36 22" strokeWidth="2.2" {...CUT} />
     </>
   ),
 };
 
 export function PlantIcon({ kind, size = 36, color = 'currentColor', label }) {
   return (
-    <svg role="img" aria-label={label} width={size} height={Math.round((size * 80) / 60)} viewBox="0 0 60 80" fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+    <svg role="img" aria-label={label} width={size} height={size} viewBox="0 0 48 48" fill={color} style={{ flexShrink: 0 }}>
       {PLANTS[kind]}
-      {POT}
     </svg>
   );
 }
