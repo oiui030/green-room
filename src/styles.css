@@ -244,3 +244,8 @@ a { color: inherit; }
   .intro-frog { transform: scale(0.85) rotate(-4deg); margin-top: 0; }
 }
 .bottom > .btn, .bottom > .card { width: 100%; }
+
+/* keep the floating frog readable over scrolling content:
+   a ground-coloured halo separates it from blobs, and content fades out before it reaches the tabs */
+.fab .sticker { box-shadow: 0 0 0 4px var(--surf); }
+.with-tabs::after { content: ''; position: fixed; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; bottom: calc(var(--tabs) + env(safe-area-inset-bottom)); height: 112px; background: linear-gradient(to bottom, rgba(243, 244, 242, 0), var(--surf) 78%); pointer-events: none; z-index: 9; }
