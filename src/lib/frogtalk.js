@@ -26,3 +26,10 @@ export function matchText(text) {
   }
   return null;
 }
+
+// How long the frog "types" before a reply shows: a beat to read your own message,
+// a little longer for longer replies, never long enough to feel slow.
+export function typingDelay(text, reducedMotion = false) {
+  if (reducedMotion) return 250;
+  return Math.min(1200, 500 + text.length * 14);
+}

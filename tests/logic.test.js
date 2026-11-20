@@ -140,3 +140,23 @@ describe('store', () => {
     expect(new Set(s.logs.map((l) => l.id)).size).toBe(s.logs.length);
   });
 });
+
+describe('frog talk', () => {
+  it('reads symptoms and intents from plain words, symptoms first', async () => {
+    const { matchText } = await import('../src/lib/frogtalk.js');
+    expect(matchText('잎이 노랗고 이상해요')).toEqual({ symptom: 'yellow' });
+    expect(matchText('요즘 시들시들해')).toEqual({ symptom: 'droopy' });
+    expect(matchText('물 언제 줘야 해')).toEqual({ intent: 'water' });
+    expect(matchText('초보한테 추천해줘')).toEqual({ intent: 'recommend' });
+    expect(matchText('오늘 날씨 좋네')).toBeNull();
+    expect(matchText('   ')).toBeNull();
+  });
+
+  it('types for a short, bounded time that grows with the reply', async () => {
+    const { typingDelay } = await import('../src/lib/frogtalk.js');
+    expect(typingDelay('네')).toBeGreaterThanOrEqual(500);
+    expect(typingDelay('가'.repeat(20))).toBeGreaterThan(typingDelay('가'));
+    expect(typingDelay('가'.repeat(500))).toBe(1200);
+    expect(typingDelay('가'.repeat(500), true)).toBe(250);
+  });
+});

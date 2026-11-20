@@ -274,3 +274,17 @@ a { color: inherit; }
 .chat-input:focus-within { box-shadow: 0 0 0 2px var(--ink); }
 .chat-send { width: 44px; height: 44px; border: none; border-radius: 999px; background: var(--ink); color: var(--lime); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .chat-send:disabled { background: var(--line); color: var(--gray); }
+
+/* the talk has a rhythm: three dots while the frog writes, then the line rises in and the answers follow */
+.msg { animation: msg-in 0.22s ease-out both; }
+.msg.typing { display: flex; align-items: center; gap: 5px; min-height: 42px; padding: 0 16px; }
+.msg.typing span { width: 7px; height: 7px; border-radius: 999px; background: var(--gray); animation: dot 1s ease-in-out infinite; }
+.msg.typing span:nth-child(2) { animation-delay: 0.15s; }
+.msg.typing span:nth-child(3) { animation-delay: 0.3s; }
+.replies { animation: msg-in 0.22s ease-out 0.18s both; }
+@keyframes msg-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes dot { 0%, 60%, 100% { transform: translateY(0); opacity: 0.45; } 30% { transform: translateY(-4px); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .msg, .replies { animation: none; }
+  .msg.typing span { animation: none; opacity: 0.7; }
+}

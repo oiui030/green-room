@@ -7,7 +7,10 @@ import { SPECIES, SPECIES_KEYS, fitFor } from '../lib/catalog.js';
 import { SYMPTOMS, SYMPTOM_KEYS } from '../lib/rescue.js';
 import { dueTasks, nextWater, plantName, taskTitle, wateringPaused } from '../lib/schedule.js';
 import { relativeLabel, todayStr } from '../lib/dates.js';
-import { matchText } from '../lib/frogtalk.js';
+import { matchText, typingDelay } from '../lib/frogtalk.js';
+
+// Tests run the talk without the typing pause.
+const INSTANT = import.meta.env.MODE === 'test';
 
 // The frog helper, as a chat. The frog asks, you answer by tapping one of its suggestions
 // or by typing. Every reply is scripted; typed text is matched on a few plain words.
@@ -108,14 +111,37 @@ export default function FrogSheet({ plantId = null, intent = null, onClose }) {
     return { ...menu('아직 글을 읽고 답하진 못해요.\n아래에서 가까운 걸 골라주세요.') };
   }
 
-  const [msgs, setMsgs] = useState(() => [
-    { from: 'frog', ...(plantId || intent === 'sick' ? sick(only()) : menu('안녕하세요, 집사님.\n뭘 도와드릴까요?')) },
-  ]);
+  const opening = () => (plantId || intent === 'sick' ? sick(only()) : menu('안녕하세요, 집사님.\n뭘 도와드릴까요?'));
+  const [msgs, setMsgs] = useState(() => (INSTANT ? [{ from: 'frog', ...opening() }] : []));
+  // While `typing`, the frog shows three dots instead of its next line, and nothing can be picked.
+  const [typing, setTyping] = useState(!INSTANT);
+  const timer = useRef(null);
   const last = msgs[msgs.length - 1];
+
+  const frogSays = (msg) => {
+    if (INSTANT) {
+      setMsgs((m) => [...m, { from: 'frog', ...msg }]);
+      return;
+    }
+    const reduced = typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setTyping(true);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => {
+      setTyping(false);
+      setMsgs((m) => [...m, { from: 'frog', ...msg }]);
+    }, typingDelay(msg.text, reduced));
+  };
+
+  useEffect(() => {
+    if (!INSTANT) frogSays(opening());
+    return () => clearTimeout(timer.current);
+    // The greeting is said once, when the sheet opens.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (endRef.current && endRef.current.scrollIntoView) endRef.current.scrollIntoView({ block: 'end' });
-  }, [msgs]);
+  }, [msgs, typing]);
 
   const pick = (option) => {
     if (option.run) option.run();
@@ -124,13 +150,15 @@ export default function FrogSheet({ plantId = null, intent = null, onClose }) {
       navigate(option.go);
       return;
     }
-    setMsgs((m) => [...m, { from: 'me', text: option.label }, { from: 'frog', ...option.next() }]);
+    const next = option.next();
+    setMsgs((m) => [...m, { from: 'me', text: option.label }]);
+    frogSays(next);
   };
 
   const send = (e) => {
     e.preventDefault();
     const said = text.trim();
-    if (!said) return;
+    if (!said || typing) return;
     setText('');
     const found = matchText(said);
     const named = state.plants.find((p) => said.includes(plantName(p))) || only();
@@ -141,7 +169,8 @@ export default function FrogSheet({ plantId = null, intent = null, onClose }) {
     else if (found.intent === 'water') reply = water();
     else if (found.intent === 'recommend') reply = recommend();
     else reply = unsure();
-    setMsgs((m) => [...m, { from: 'me', text: said }, { from: 'frog', ...reply }]);
+    setMsgs((m) => [...m, { from: 'me', text: said }]);
+    frogSays(reply);
   };
 
   return (
@@ -152,7 +181,7 @@ export default function FrogSheet({ plantId = null, intent = null, onClose }) {
           <Frog size={48} ring={4} tone="lime" />
           <div className="grow col gap-2">
             <span className="sheet-title">개구리</span>
-            <span className="note">고르거나 직접 적어주세요</span>
+            <span className="note">{typing ? '답을 쓰는 중이에요' : '고르거나 직접 적어주세요'}</span>
           </div>
           <button type="button" className="icon-btn" aria-label="닫기" onClick={onClose}>
             <Icon name="close" size={22} width={2} />
@@ -167,17 +196,24 @@ export default function FrogSheet({ plantId = null, intent = null, onClose }) {
               {m.text}
             </div>
           ))}
-          <div className="replies" role="group" aria-label="고를 수 있는 답">
-            {last.options.map((o) => (
-              <button key={o.label} type="button" className="reply" onClick={() => pick(o)}>{o.label}</button>
-            ))}
-          </div>
+          {typing && (
+            <div className="msg frog typing" role="status" aria-label="개구리가 답을 쓰는 중">
+              <span /><span /><span />
+            </div>
+          )}
+          {!typing && last && last.from === 'frog' && (
+            <div className="replies" role="group" aria-label="고를 수 있는 답">
+              {last.options.map((o) => (
+                <button key={o.label} type="button" className="reply" onClick={() => pick(o)}>{o.label}</button>
+              ))}
+            </div>
+          )}
           <span ref={endRef} />
         </div>
 
         <form className="chat-input" onSubmit={send}>
           <input type="text" value={text} onChange={(e) => setText(e.target.value)} aria-label="직접 적기" placeholder="직접 적어도 돼요" enterKeyHint="send" autoComplete="off" />
-          <button type="submit" className="chat-send" aria-label="보내기" disabled={!text.trim()}>
+          <button type="submit" className="chat-send" aria-label="보내기" disabled={!text.trim() || typing}>
             <Icon name="send" size={22} width={2.6} />
           </button>
         </form>
