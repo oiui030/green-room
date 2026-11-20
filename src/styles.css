@@ -259,3 +259,18 @@ a { color: inherit; }
 .chips.scroll .chip { flex-shrink: 0; }
 .profile-row { min-height: 44px; margin-top: -8px; }
 .intro-frog { align-self: center; }
+
+/* the frog helper as a chat: its lines on the left, yours on the right, suggested answers under the last line */
+.sheet.chat { height: 82dvh; max-height: 82dvh; overflow: hidden; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+.chat-log { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 4px 0 8px; }
+.msg { max-width: 84%; padding: 10px 14px; font-size: 15px; line-height: 1.5; white-space: pre-line; word-break: keep-all; }
+.msg.frog { align-self: flex-start; background: var(--surf); border-radius: 4px 18px 18px 18px; }
+.msg.me { align-self: flex-end; background: var(--ink); color: var(--surf); border-radius: 18px 4px 18px 18px; }
+.replies { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.reply { min-height: 44px; padding: 8px 16px; border: 1.5px solid var(--ink); border-radius: 999px; background: var(--white); font-size: 14px; font-weight: 800; text-align: left; }
+.chat-input { display: flex; align-items: center; gap: 8px; padding: 4px 4px 4px 16px; border-radius: 999px; background: var(--surf); }
+.chat-input input { flex: 1; min-width: 0; min-height: 44px; border: none; background: none; font: inherit; font-size: 16px; color: var(--ink); outline: none; }
+.chat-input input::placeholder { color: var(--gray); }
+.chat-input:focus-within { box-shadow: 0 0 0 2px var(--ink); }
+.chat-send { width: 44px; height: 44px; border: none; border-radius: 999px; background: var(--ink); color: var(--lime); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.chat-send:disabled { background: var(--line); color: var(--gray); }

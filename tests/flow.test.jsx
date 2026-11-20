@@ -108,7 +108,11 @@ describe('frog helper', () => {
     renderApp('/log', state);
     await user.click(screen.getByRole('button', { name: '개구리에게 도움 요청' }));
     const sheet = screen.getByRole('dialog', { name: '개구리 도우미' });
+    await user.click(within(sheet).getByRole('button', { name: '식물이 이상해요' }));
+    expect(within(sheet).getByText('선인장, 어떤 모습이에요?')).toBeInTheDocument();
     await user.click(within(sheet).getByRole('button', { name: /밑동이 무르고/ }));
+    expect(within(sheet).getByText(/물배가 빵빵해요/)).toBeInTheDocument();
+    await user.click(within(sheet).getByRole('button', { name: '구조 작전 시작' }));
 
     expect(screen.getByRole('heading', { name: '물배가 빵빵해요' })).toBeInTheDocument();
     expect(screen.getByText('6개 중 0개')).toBeInTheDocument();
@@ -129,7 +133,8 @@ describe('frog helper', () => {
     const user = userEvent.setup();
     renderApp('/home', onboarded());
     await user.click(screen.getByRole('button', { name: '개구리에게 도움 요청' }));
-    expect(screen.getByRole('link', { name: '도감에서 등록하기' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: '식물이 이상해요' }));
+    expect(screen.getByRole('button', { name: '도감에서 등록하기' })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: '닫기' }));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
@@ -182,5 +187,45 @@ describe('improvements from the walkthrough', () => {
     await user.click(screen.getByRole('button', { name: '다음' }));
     await user.click(screen.getByRole('button', { name: '이 기준으로 다시 고르기' }));
     expect(screen.getByText('햇빛 잘 드는 방, 자주 잊는 집사 기준이에요')).toBeInTheDocument();
+  });
+});
+
+describe('frog chat', () => {
+  const two = () => onboarded((s) => reducer(reducer(s, { type: 'addPlant', species: 'stuki', daysAgo: 0 }), { type: 'addPlant', species: 'pothos', daysAgo: 7 }));
+
+  it('asks which plant when there are several, then offers a rescue plan to confirm', async () => {
+    const user = userEvent.setup();
+    renderApp('/home', two());
+    await user.click(screen.getByRole('button', { name: /어딘가 이상해요/ }));
+    const sheet = screen.getByRole('dialog', { name: '개구리 도우미' });
+    expect(within(sheet).getByText('어느 식물이에요?')).toBeInTheDocument();
+    await user.click(within(sheet).getByRole('button', { name: '스투키' }));
+    await user.click(within(sheet).getByRole('button', { name: /잎이 노랗게/ }));
+    await user.click(within(sheet).getByRole('button', { name: '다른 증상이에요' }));
+    await user.click(within(sheet).getByRole('button', { name: /키만 삐죽/ }));
+    await user.click(within(sheet).getByRole('button', { name: '구조 작전 시작' }));
+    expect(screen.getByRole('heading', { name: '햇빛이 고파요' })).toBeInTheDocument();
+  });
+
+  it('reads a typed symptom and plant name, and says so when it cannot read a message', async () => {
+    const user = userEvent.setup();
+    renderApp('/log', two());
+    await user.click(screen.getByRole('button', { name: '개구리에게 도움 요청' }));
+    const sheet = screen.getByRole('dialog', { name: '개구리 도우미' });
+    await user.type(within(sheet).getByRole('textbox', { name: '직접 적기' }), '오늘 날씨 좋네{Enter}');
+    expect(within(sheet).getByText(/아직 글을 읽고 답하진 못해요/)).toBeInTheDocument();
+    await user.type(within(sheet).getByRole('textbox', { name: '직접 적기' }), '스킨답서스 잎이 노랗게 됐어{Enter}');
+    expect(within(sheet).getByText(/뿌리가 답답해요/)).toBeInTheDocument();
+    expect(within(sheet).getByRole('button', { name: '구조 작전 시작' })).toBeInTheDocument();
+  });
+
+  it('answers when to water from the schedule', async () => {
+    const user = userEvent.setup();
+    renderApp('/log', two());
+    await user.click(screen.getByRole('button', { name: '개구리에게 도움 요청' }));
+    await user.click(screen.getByRole('button', { name: '물 언제 줘요?' }));
+    expect(screen.getByText(/스킨답서스: 오늘이에요/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: '돌봄 달력 보기' }));
+    expect(screen.getByRole('heading', { name: '돌봄 달력' })).toBeInTheDocument();
   });
 });

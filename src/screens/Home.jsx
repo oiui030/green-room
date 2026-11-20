@@ -122,7 +122,7 @@ export default function Home() {
           </button>
         </>
       )}
-      {sheet && <FrogSheet onClose={() => setSheet(false)} />}
+      {sheet && <FrogSheet intent="sick" onClose={() => setSheet(false)} />}
     </Page>
   );
 }
