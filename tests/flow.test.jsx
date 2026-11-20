@@ -26,8 +26,14 @@ describe('first run', () => {
     renderApp('/');
     await user.click(screen.getByRole('link', { name: '시작하기' }));
     await user.click(screen.getByRole('link', { name: '좋아요' }));
-    await user.click(screen.getByRole('button', { name: '어둑해요' }));
-    expect(screen.getByRole('button', { name: '어둑해요' })).toHaveAttribute('aria-pressed', 'true');
+    await user.click(screen.getByRole('button', { name: /거의 안 들어요/ }));
+    expect(screen.getByRole('button', { name: /거의 안 들어요/ })).toHaveAttribute('aria-pressed', 'true');
+    await user.click(screen.getByRole('button', { name: '다음' }));
+    expect(screen.getByRole('heading', { name: /자주 깜빡하나요/ })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: '이전 질문' }));
+    expect(screen.getByRole('button', { name: /거의 안 들어요/ })).toHaveAttribute('aria-pressed', 'true');
+    await user.click(screen.getByRole('button', { name: '다음' }));
+    await user.click(screen.getByRole('button', { name: /자주 잊어요/ }));
     await user.click(screen.getByRole('button', { name: '다음' }));
     await user.click(screen.getByRole('button', { name: /있어요.*도감에서 골라 등록해요/ }));
 

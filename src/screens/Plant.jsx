@@ -36,7 +36,7 @@ export default function Plant() {
           <span className="hero-note">함께한 지 {days + 1}일</span>
           <h1 className="h1">{plantName(plant)}</h1>
         </div>
-        <span className="pblob"><PlantIcon kind={s.icon} size={72} label={s.name} /></span>
+        <span className="pblob"><PlantIcon kind={s.icon} size={84} label={s.name} /></span>
       </div>
 
       <div className="grid-3">

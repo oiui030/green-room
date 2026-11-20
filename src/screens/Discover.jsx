@@ -38,7 +38,7 @@ export default function Discover() {
         {list.map(({ key, s, fit }) => (
           <Link key={key} className="card pcard" to={`/species/${key}${mine ? '?mode=mine' : ''}`}>
             <span className={`badge ${fit.tone}`}>{fit.label}</span>
-            <span className="pblob"><PlantIcon kind={s.icon} size={52} label="" /></span>
+            <span className="pblob"><PlantIcon kind={s.icon} size={60} label="" /></span>
             <span className="title-s">{s.name}</span>
             <span className="meta">
               <Icon name="drop" size={16} color="var(--gray)" />{s.water}
@@ -76,12 +76,12 @@ export function Species() {
           <span className="tag">{fit.label}</span>
           <h1 className="h1">{s.name}</h1>
         </div>
-        <span className="pblob"><PlantIcon kind={s.icon} size={72} label={s.name} /></span>
+        <span className="pblob"><PlantIcon kind={s.icon} size={84} label={s.name} /></span>
       </div>
       <div className="grid-3">
-        <div className="card ctile"><Icon name="drop" size={26} width={2} />{s.water}</div>
-        <div className="card ctile"><Icon name="sun" size={26} width={2} />{s.sun}</div>
-        <div className="card ctile"><Icon name="sprout" size={26} width={2} />{s.level}</div>
+        <div className="card ctile"><Icon name="drop" size={28} width={2} />{s.water}</div>
+        <div className="card ctile"><Icon name="sun" size={28} width={2} />{s.sun}</div>
+        <div className="card ctile"><Icon name="sprout" size={28} width={2} />{s.level}</div>
       </div>
       <span className="label">이것만 기억해요</span>
       <ul className="tips">{s.tips.map((t) => <li key={t}>{t}</li>)}</ul>
@@ -89,7 +89,7 @@ export function Species() {
       <div className="grid-2">
         {s.similar.map((k) => (
           <Link key={k} className="card row gap-12 similar" to={`/species/${k}`}>
-            <span className="disc"><PlantIcon kind={SPECIES[k].icon} size={26} label="" /></span>
+            <span className="disc"><PlantIcon kind={SPECIES[k].icon} size={28} label="" /></span>
             <span className="title-s">{SPECIES[k].name}</span>
           </Link>
         ))}

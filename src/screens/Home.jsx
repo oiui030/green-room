@@ -74,7 +74,7 @@ export default function Home() {
               const on = dueIds.has(p.id);
               return (
                 <Link key={p.id} className={`tile${on ? ' on' : ''}`} to={`/plant/${p.id}`}>
-                  <span className="tile-blob"><PlantIcon kind={SPECIES[p.species].icon} size={40} label="" /></span>
+                  <span className="tile-blob"><PlantIcon kind={SPECIES[p.species].icon} size={54} label="" /></span>
                   <span className="tile-name">{plantName(p)}</span>
                   <span className="tile-state">{plantState(p, today)}</span>
                 </Link>

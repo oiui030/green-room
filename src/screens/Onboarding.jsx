@@ -4,10 +4,10 @@ import Icon from '../components/Icon.jsx';
 import Frog from '../components/Frog.jsx';
 import { useStore } from '../lib/store.jsx';
 
-function Dots({ at }) {
+function Bars({ at, total }) {
   return (
-    <div className="dots" aria-hidden="true">
-      {[0, 1, 2].map((i) => <span key={i} className={i <= at ? 'on' : ''} />)}
+    <div className="dots" role="img" aria-label={`${total}단계 중 ${at}단계`}>
+      {Array.from({ length: total }, (_, i) => <span key={i} className={i < at ? 'on' : ''} />)}
     </div>
   );
 }
@@ -45,7 +45,6 @@ export function About() {
   return (
     <div className="page">
       <main className="page-body pad">
-        <div className="row topbar"><Dots at={0} /></div>
         <h1 className="h1">초록방이<br />해주는 일</h1>
         <div className="col gap-16">
           {ABOUT.map(([icon, title, line]) => (
@@ -70,8 +69,47 @@ export function About() {
   );
 }
 
-const LIGHTS = [['high', '쨍쨍해요', '해가 직접 들어요'], ['mid', '은은해요', '밝지만 직접은 안 들어요'], ['low', '어둑해요', '낮에도 불을 켜요']];
-const STYLES = [['day', '매일 봐요', 'drop'], ['week', '주말에만', 'calendar'], ['oops', '자주 깜빡', 'bell']];
+const LIGHTS = [['high', '햇빛 맛집이에요', '창가에 해가 한참 머물러요'], ['mid', '반나절쯤 들어요', '오전이나 오후에만 밝아요'], ['low', '거의 안 들어요', '낮에도 불을 켜요']];
+const STYLES = [['day', '꼬박꼬박 챙겨요', '식물 보는 게 낙이에요'], ['week', '가끔 깜빡해요', '바쁜 주엔 잊어버려요'], ['oops', '자주 잊어요', '한 달도 그냥 지나가요']];
+
+// One question per screen. `back` is a link on the first step and a button after it.
+function Step({ at, back, title, sub, children, bottom }) {
+  return (
+    <div className="page">
+      <main className="page-body pad">
+        <div className="ob-top">
+          {back}
+          <Bars at={at} total={3} />
+        </div>
+        <div className="ob-head">
+          <div className="col gap-8">
+            <h1 className="h1">{title}</h1>
+            <span className="note-l">{sub}</span>
+          </div>
+          <Frog size={92} ring={6} />
+        </div>
+        {children}
+        <div className="bottom col gap-8">{bottom}</div>
+      </main>
+    </div>
+  );
+}
+
+function Answers({ label, items, value, onPick }) {
+  return (
+    <div className="col gap-8" role="group" aria-label={label}>
+      {items.map(([key, title, note]) => (
+        <button key={key} type="button" className={`answer${value === key ? ' on' : ''}`} aria-pressed={value === key} onClick={() => onPick(key)}>
+          <span className="grow col gap-2">
+            <span className="title-m">{title}</span>
+            <span className="note">{note}</span>
+          </span>
+          {value === key && <Icon name="check" size={22} width={3} color="var(--lime)" />}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export function Onboard() {
   const { dispatch } = useStore();
@@ -84,69 +122,66 @@ export function Onboard() {
     dispatch({ type: 'onboard', profile: { light, style } });
     navigate(to);
   };
+  const backButton = (
+    <button type="button" className="ob-back" aria-label="이전 질문" onClick={() => setStep(step - 1)}>
+      <Icon name="back" size={26} width={2.6} />
+    </button>
+  );
 
   if (step === 1) {
     return (
-      <div className="page">
-        <main className="page-body pad">
-          <div className="row topbar"><Dots at={1} /></div>
-          <h1 className="h1">내 방은<br />어떤 곳인가요?</h1>
-          <div className="col gap-8">
-            <span className="label soft">햇빛</span>
-            <div className="grid-3" role="group" aria-label="햇빛">
-              {LIGHTS.map(([key, label]) => (
-                <button key={key} type="button" className={`option${light === key ? ' on' : ''}`} aria-pressed={light === key} onClick={() => setLight(key)}>
-                  <Icon name="sun" size={32} />
-                  {label}
-                </button>
-              ))}
-            </div>
-            <span className="note">{LIGHTS.find((l) => l[0] === light)[2]}</span>
-          </div>
-          <div className="col gap-8">
-            <span className="label soft">나는 어떤 집사</span>
-            <div className="grid-3" role="group" aria-label="나는 어떤 집사">
-              {STYLES.map(([key, label, icon]) => (
-                <button key={key} type="button" className={`option${style === key ? ' on' : ''}`} aria-pressed={style === key} onClick={() => setStyle(key)}>
-                  <Icon name={icon} size={32} />
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="bottom">
-            <button type="button" className="btn primary" onClick={() => setStep(2)}>다음</button>
-          </div>
-        </main>
-      </div>
+      <Step
+        at={1}
+        back={<Link className="ob-back" to="/about" aria-label="소개로 돌아가기"><Icon name="back" size={26} width={2.6} /></Link>}
+        title={<>방에 햇빛이<br />얼마나 들어요?</>}
+        sub="대충 골라도 괜찮아요"
+        bottom={<button type="button" className="btn primary" onClick={() => setStep(2)}>다음</button>}
+      >
+        <Answers label="햇빛" items={LIGHTS} value={light} onPick={setLight} />
+      </Step>
+    );
+  }
+
+  if (step === 2) {
+    return (
+      <Step
+        at={2}
+        back={backButton}
+        title={<>물 주는 걸<br />자주 깜빡하나요?</>}
+        sub="솔직할수록 잘 맞춰드려요"
+        bottom={<button type="button" className="btn primary" onClick={() => setStep(3)}>다음</button>}
+      >
+        <Answers label="돌봄 습관" items={STYLES} value={style} onPick={setStyle} />
+      </Step>
     );
   }
 
   return (
-    <div className="page">
-      <main className="page-body pad">
-        <div className="row topbar"><Dots at={2} /></div>
-        <h1 className="h1">같이 사는<br />식물이 있나요?</h1>
-        <button type="button" className="choice" onClick={() => finish('/discover?mode=mine')}>
-          <span className="disc lg"><Icon name="sprout" size={32} width={2} /></span>
-          <span className="grow col gap-4">
+    <Step
+      at={3}
+      back={backButton}
+      title={<>같이 사는<br />식물이 있나요?</>}
+      sub="있으면 바로 돌봄 일정을 만들어요"
+      bottom={<button type="button" className="btn secondary" onClick={() => finish('/home')}>일단 둘러볼게요</button>}
+    >
+      <div className="col gap-8">
+        <button type="button" className="answer" onClick={() => finish('/discover?mode=mine')}>
+          <span className="disc"><Icon name="sprout" size={24} width={2.2} /></span>
+          <span className="grow col gap-2">
             <span className="title-m">있어요</span>
             <span className="note">도감에서 골라 등록해요</span>
           </span>
-          <Icon name="chev" size={22} width={2} color="var(--gray)" />
+          <Icon name="chev" size={22} width={2.4} color="var(--gray)" />
         </button>
-        <button type="button" className="choice" onClick={() => finish('/discover')}>
-          <span className="disc lg"><Icon name="book" size={32} width={2} /></span>
-          <span className="grow col gap-4">
+        <button type="button" className="answer" onClick={() => finish('/discover')}>
+          <span className="disc"><Icon name="book" size={24} width={2.2} /></span>
+          <span className="grow col gap-2">
             <span className="title-m">아직 없어요</span>
             <span className="note">어울리는 친구를 찾아줘요</span>
           </span>
-          <Icon name="chev" size={22} width={2} color="var(--gray)" />
+          <Icon name="chev" size={22} width={2.4} color="var(--gray)" />
         </button>
-        <div className="bottom">
-          <button type="button" className="btn secondary" onClick={() => finish('/home')}>일단 둘러볼게요</button>
-        </div>
-      </main>
-    </div>
+      </div>
+    </Step>
   );
 }
