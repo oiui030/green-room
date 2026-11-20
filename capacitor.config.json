@@ -1,0 +1,9 @@
+{
+  "appId": "com.oiui030.greenroom",
+  "appName": "초록방",
+  "webDir": "dist",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#F3F4F2"
+  }
+}
