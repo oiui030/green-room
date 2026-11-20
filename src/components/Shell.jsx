@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { useStore } from '../lib/store.jsx';
 import Icon from './Icon.jsx';
 import FrogSheet from './FrogSheet.jsx';
 import Frog from './Frog.jsx';
@@ -33,6 +34,10 @@ export function Nav() {
 // Page frame. `tabs` shows the bottom menu, `frog` shows the floating helper.
 export function Page({ children, tabs = false, frog = true, plantId = null, className = '', deco = null }) {
   const [open, setOpen] = useState(false);
+  const { toast, undo } = useStore();
+  const { pathname } = useLocation();
+  // A new screen starts at its top, whatever the scroll position of the one before.
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
   return (
     <div className={`page ${tabs ? 'with-tabs' : ''} ${className}`}>
       {deco}
@@ -42,6 +47,12 @@ export function Page({ children, tabs = false, frog = true, plantId = null, clas
           <button type="button" className="fab" aria-label="개구리에게 도움 요청" onClick={() => setOpen(true)}>
             <Frog size={72} ring={6} tone="lime" />
           </button>
+        </div>
+      )}
+      {toast && (
+        <div className={`toast ${tabs ? 'above-tabs' : ''}`} role="status">
+          <span className="grow">{toast.message}</span>
+          <button type="button" className="toast-undo" onClick={undo}>되돌리기</button>
         </div>
       )}
       {tabs && <Nav />}

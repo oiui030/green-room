@@ -3,6 +3,7 @@ import Icon from '../components/Icon.jsx';
 import { Page } from '../components/Shell.jsx';
 import TaskCard from '../components/TaskCard.jsx';
 import { useStore } from '../lib/store.jsx';
+import { SYMPTOMS } from '../lib/rescue.js';
 import { todayStr, weekOf, weekdayLabel, relativeLabel } from '../lib/dates.js';
 import { dueTasks, upcomingTasks, marksFor, taskTitle, plantName, wateringPaused } from '../lib/schedule.js';
 
@@ -15,7 +16,7 @@ export default function Care() {
   const due = dueTasks(state.plants, today);
   const upcoming = upcomingTasks(state.plants, today);
   const marks = marksFor(state.plants, weekOf(today), today);
-  const paused = state.plants.filter(wateringPaused);
+  const rescues = state.plants.filter((p) => p.rescue);
   const find = (id) => state.plants.find((p) => p.id === id);
 
   return (
@@ -52,20 +53,29 @@ export default function Care() {
         </div>
       )}
 
-      {(upcoming.length > 0 || paused.length > 0) && <span className="label">곧 올 일</span>}
+      {rescues.length > 0 && <span className="label">진행 중인 구조 작전</span>}
+      {rescues.length > 0 && (
+        <div className="col gap-8">
+          {rescues.map((p) => (
+            <Link key={p.id} className="rowcard" to={`/plan/${p.id}`}>
+              <span className="disc sm lime"><Icon name="sos" size={20} width={2.2} /></span>
+              <span className="grow col gap-2">
+                <span>{plantName(p)} 구조 작전</span>
+                <span className="note">{SYMPTOMS[p.rescue.symptom].steps.length}개 중 {p.rescue.done.length}개 했어요{wateringPaused(p) ? ', 물은 쉬는 중' : ''}</span>
+              </span>
+              <Icon name="chev" size={20} width={2.4} color="var(--gray)" />
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {upcoming.length > 0 && <span className="label">곧 올 일</span>}
       <div className="col gap-8">
         {upcoming.map((t) => (
           <Link key={t.plantId + t.type} className="rowcard" to={`/plant/${t.plantId}`}>
             <span className="disc sm"><Icon name={ICON[t.type]} size={20} width={2.2} /></span>
             <span className="grow">{taskTitle(t, find(t.plantId))}</span>
             <span className="note">{relativeLabel(t.due, today)}</span>
-          </Link>
-        ))}
-        {paused.map((p) => (
-          <Link key={p.id} className="rowcard" to={`/plan/${p.id}`}>
-            <span className="disc sm"><Icon name="sos" size={20} width={2.2} /></span>
-            <span className="grow">{plantName(p)} 물 금지</span>
-            <span className="note">구조 중</span>
           </Link>
         ))}
       </div>

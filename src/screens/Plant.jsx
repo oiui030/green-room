@@ -11,7 +11,7 @@ import { nextWater, nextWipe, plantName, wateringPaused } from '../lib/schedule.
 
 export default function Plant() {
   const { id } = useParams();
-  const { state, dispatch } = useStore();
+  const { state, dispatch, act } = useStore();
   const navigate = useNavigate();
   const [sheet, setSheet] = useState(false);
   const [confirm, setConfirm] = useState(false);
@@ -85,7 +85,7 @@ export default function Plant() {
 
       <div className="bottom row gap-8 pair">
         {!wateringPaused(plant) && (
-          <button type="button" className="btn secondary grow" onClick={() => dispatch({ type: 'water', id: plant.id })}>지금 물 줬어요</button>
+          <button type="button" className="btn secondary grow" onClick={() => act({ type: 'water', id: plant.id }, `${s.name} 물 줬어요`)}>지금 물 줬어요</button>
         )}
         {plant.rescue ? (
           <Link className="btn primary grow" to={`/plan/${plant.id}`}>구조 작전 이어가기</Link>

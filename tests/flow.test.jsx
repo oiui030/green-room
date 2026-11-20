@@ -146,3 +146,41 @@ describe('frog helper', () => {
     expect(screen.getByText('아직 식구가 없어요')).toBeInTheDocument();
   });
 });
+
+describe('improvements from the walkthrough', () => {
+  it('lets a mistaken tap on the done button be undone', async () => {
+    const user = userEvent.setup();
+    renderApp('/home', onboarded((s) => reducer(s, { type: 'addPlant', species: 'pothos', daysAgo: 7 })));
+    await user.click(screen.getByRole('button', { name: '줬어요' }));
+    expect(screen.getByText('오늘 할 일 없음')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('스킨답서스 물 줬어요');
+    await user.click(screen.getByRole('button', { name: '되돌리기' }));
+    expect(screen.getByText('스킨답서스 물 주기')).toBeInTheDocument();
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
+
+  it('shows an unfinished rescue plan on the home screen instead of a rest day', async () => {
+    const user = userEvent.setup();
+    const state = onboarded((s) => reducer(reducer(s, { type: 'addPlant', species: 'ivy', daysAgo: 0 }), { type: 'startRescue', id: 'p1', symptom: 'yellow' }));
+    renderApp('/home', state);
+    expect(screen.getByText('구조 작전 중')).toBeInTheDocument();
+    expect(screen.queryByText('오늘은 쉬는 날')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('link', { name: '이어가기' }));
+    expect(screen.getByRole('heading', { name: '뿌리가 답답해요' })).toBeInTheDocument();
+  });
+
+  it('suggests plants for the room on an empty home and lets the room be changed from the catalog', async () => {
+    const user = userEvent.setup();
+    renderApp('/home', reducer(initialState, { type: 'onboard', profile: { light: 'low', style: 'oops' } }));
+    expect(screen.getByText('내 방에 맞는 친구')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /스투키.*찰떡궁합/ })).toBeInTheDocument();
+    await user.click(screen.getByRole('link', { name: '전부 보기' }));
+    expect(screen.getByText('햇빛 적은 방, 자주 잊는 집사 기준이에요')).toBeInTheDocument();
+    await user.click(screen.getByRole('link', { name: '바꾸기' }));
+    expect(screen.getByRole('button', { name: /거의 안 들어요/ })).toHaveAttribute('aria-pressed', 'true');
+    await user.click(screen.getByRole('button', { name: /햇빛 맛집이에요/ }));
+    await user.click(screen.getByRole('button', { name: '다음' }));
+    await user.click(screen.getByRole('button', { name: '이 기준으로 다시 고르기' }));
+    expect(screen.getByText('햇빛 잘 드는 방, 자주 잊는 집사 기준이에요')).toBeInTheDocument();
+  });
+});

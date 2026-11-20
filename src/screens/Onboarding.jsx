@@ -73,13 +73,13 @@ const LIGHTS = [['high', '햇빛 맛집이에요', '창가에 해가 한참 머�
 const STYLES = [['day', '꼬박꼬박 챙겨요', '식물 보는 게 낙이에요'], ['week', '가끔 깜빡해요', '바쁜 주엔 잊어버려요'], ['oops', '자주 잊어요', '한 달도 그냥 지나가요']];
 
 // One question per screen. `back` is a link on the first step and a button after it.
-function Step({ at, back, title, sub, children, bottom }) {
+function Step({ at, total = 3, back, title, sub, children, bottom }) {
   return (
     <div className="page">
       <main className="page-body pad">
         <div className="ob-top">
           {back}
-          <Bars at={at} total={3} />
+          <Bars at={at} total={total} />
         </div>
         <div className="ob-head">
           <div className="col gap-8">
@@ -112,11 +112,14 @@ function Answers({ label, items, value, onPick }) {
 }
 
 export function Onboard() {
-  const { dispatch } = useStore();
+  const { state, dispatch } = useStore();
   const navigate = useNavigate();
+  // Coming back from the catalog to change the room: start from the saved answers and skip the plant question.
+  const again = state.profile.onboarded;
+  const total = again ? 2 : 3;
   const [step, setStep] = useState(1);
-  const [light, setLight] = useState('mid');
-  const [style, setStyle] = useState('week');
+  const [light, setLight] = useState(again ? state.profile.light : 'mid');
+  const [style, setStyle] = useState(again ? state.profile.style : 'week');
 
   const finish = (to) => {
     dispatch({ type: 'onboard', profile: { light, style } });
@@ -132,7 +135,8 @@ export function Onboard() {
     return (
       <Step
         at={1}
-        back={<Link className="ob-back" to="/about" aria-label="소개로 돌아가기"><Icon name="back" size={26} width={2.6} /></Link>}
+        total={total}
+        back={<Link className="ob-back" to={again ? '/discover' : '/about'} aria-label={again ? '도감으로 돌아가기' : '소개로 돌아가기'}><Icon name="back" size={26} width={2.6} /></Link>}
         title={<>방에 햇빛이<br />얼마나 들어요?</>}
         sub="대충 골라도 괜찮아요"
         bottom={<button type="button" className="btn primary" onClick={() => setStep(2)}>다음</button>}
@@ -146,10 +150,13 @@ export function Onboard() {
     return (
       <Step
         at={2}
+        total={total}
         back={backButton}
         title={<>물 주는 걸<br />자주 깜빡하나요?</>}
         sub="솔직할수록 잘 맞춰드려요"
-        bottom={<button type="button" className="btn primary" onClick={() => setStep(3)}>다음</button>}
+        bottom={again
+          ? <button type="button" className="btn primary" onClick={() => finish('/discover')}>이 기준으로 다시 고르기</button>
+          : <button type="button" className="btn primary" onClick={() => setStep(3)}>다음</button>}
       >
         <Answers label="돌봄 습관" items={STYLES} value={style} onPick={setStyle} />
       </Step>

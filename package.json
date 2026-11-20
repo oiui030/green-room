@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "ios": "vite build && cap sync ios"
+    "ios": "vite build && cap sync ios",
+    "build:preview": "VITE_ROUTER=memory vite build --outDir dist-preview"
   },
   "dependencies": {
     "@capacitor/core": "^8.6.2",
